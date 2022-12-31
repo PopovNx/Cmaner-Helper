@@ -4,6 +4,7 @@ using Cmaner.Holder;
 #if OS_WINDOWS
 using System.Security.Principal;
 #endif
+
 namespace Cmaner;
 
 public class Runner
@@ -31,15 +32,21 @@ public class Runner
             }
         }
 
-        return new ProcessStartInfo("cmd.exe", $"/c \"{Command.CommandText}\"");
+        return new ProcessStartInfo
+        {
+            WorkingDirectory = Command.WorkingDirectory ?? Environment.CurrentDirectory,
+            FileName = "cmd.exe",
+            Arguments = $"/c \"{Command.CommandText}\"",
+        };
+
+
 #elif OS_LINUX
         return Command.AdminRequired
             ? new ProcessStartInfo("bash", $"-c \"sudo {Command.CommandText}\"")
             : new ProcessStartInfo("bash", "-c \"" + Command.CommandText + "\"");
 #elif OS_MAC
-        return Command.AdminRequired
-            ? new ProcessStartInfo("bash", $"-c \"sudo {Command.CommandText}\"")
-            : new ProcessStartInfo("bash", "-c \"" + Command.CommandText + "\"");
+      //todo
+        #error "Not implemented"
 #else
     #error Unsupported OS
 #endif

@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PublishAot>true</PublishAot>
+        <PublishAot1>true</PublishAot1>
     </PropertyGroup>
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
         <DefineConstants>OS_WINDOWS</DefineConstants>

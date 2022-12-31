@@ -20,7 +20,7 @@ public class Storage
     public void Save()
     {
         using var file = File.Open(FileName, FileMode.Truncate, FileAccess.Write);
-        using var writer = new BinaryWriter(file, Encoding.ASCII);
+        using var writer = new BinaryWriter(file, Encoding.UTF8);
         writer.Write(Categories.Count);
         foreach (var cat in Categories.Select(category => category.ToBytes()))
         {
@@ -34,7 +34,7 @@ public class Storage
     private void Load()
     {
         using var file = File.Open(FileName, FileMode.Open, FileAccess.Read);
-        using var reader = new BinaryReader(file);
+        using var reader = new BinaryReader(file, Encoding.UTF8);
         if (reader.BaseStream.Length == 0)
             return;
         var count = reader.ReadInt32();
