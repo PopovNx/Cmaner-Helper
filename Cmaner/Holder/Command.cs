@@ -1,8 +1,5 @@
-﻿using System.Text;
+﻿namespace Cmaner.Holder;
 
-namespace Cmaner.Holder;
-
-[Serializable]
 public class Command
 {
     public string? Title { get; set; }

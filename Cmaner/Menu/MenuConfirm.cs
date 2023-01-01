@@ -1,12 +1,12 @@
 ﻿namespace Cmaner.Menu;
 
-public class MenuConfirm : IMenu<bool>
+public class MenuConfirm : Menu<bool>
 {
     public MenuConfirm(string message) => Message = message;
 
     private string Message { get; }
 
-    public IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<string> PrepareBuffer()
     {
         yield return Message;
         if (Result)
@@ -21,10 +21,9 @@ public class MenuConfirm : IMenu<bool>
         }
     }
 
-    public void ProcessInput()
+    public override void ProcessInput()
     {
-        var key = Console.ReadKey(true).Key;
-        switch (key)
+        switch (ReadKey().Key)
         {
             case ConsoleKey.UpArrow or ConsoleKey.DownArrow:
                 Result = !Result;
@@ -35,6 +34,4 @@ public class MenuConfirm : IMenu<bool>
         }
     }
 
-    public bool Result { get; private set; }
-    public bool IsFinished { get; private set; }
 }

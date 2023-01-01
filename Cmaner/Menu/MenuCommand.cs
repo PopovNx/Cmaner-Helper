@@ -3,18 +3,16 @@ using Cmaner.Holder;
 
 namespace Cmaner.Menu;
 
-public class MenuCommand : IMenu<Command?>
+public class MenuCommand : Menu<Command?>
 {
-    private readonly Storage _storage;
     private int _selected;
     private int _totalMenuItems;
-    public MenuCommand(Storage storage) => _storage = storage;
 
-    public IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<string> PrepareBuffer()
     {
         var curMenu = 0;
         yield return "== Select a command ==";
-        foreach (var cat in _storage.Categories)
+        foreach (var cat in CmStorage.Instance.Categories)
         {
             if (string.IsNullOrEmpty(cat.Description))
                 yield return $"[{cat.Name}]";
@@ -35,14 +33,16 @@ public class MenuCommand : IMenu<Command?>
                 }
                 else
                     strBuilder.Append(cmd.CommandText);
+
                 if (!string.IsNullOrEmpty(cmd.Description))
                     strBuilder.Append($" - {cmd.Description}");
-                
+
                 if (!string.IsNullOrEmpty(cmd.ShortCall))
                     strBuilder.Append($" (short: {cmd.ShortCall})");
                 yield return $"\t{strBuilder}";
                 curMenu++;
             }
+
             yield return "";
         }
 
@@ -50,10 +50,10 @@ public class MenuCommand : IMenu<Command?>
     }
 
 
-    public void ProcessInput()
+    public override void ProcessInput()
     {
-        var key = Console.ReadKey(true).Key;
-        switch (key)
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+        switch (ReadKey().Key)
         {
             case ConsoleKey.UpArrow:
                 _selected--;
@@ -70,9 +70,4 @@ public class MenuCommand : IMenu<Command?>
                 break;
         }
     }
-
-    public Command? Result { get; private set; }
-
-
-    public bool IsFinished { get; private set; }
 }

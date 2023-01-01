@@ -1,11 +1,10 @@
 ﻿namespace Cmaner.Holder;
 
-[Serializable]
 public class Category
 {
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
-    public List<Command> Commands { get; set; } = new();
+    public List<Command> Commands { get; private init; } = new();
 
     public byte[] ToBytes()
     {

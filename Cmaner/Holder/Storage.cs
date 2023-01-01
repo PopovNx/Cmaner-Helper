@@ -27,9 +27,7 @@ public class Storage
             writer.Write(cat.Length);
             writer.Write(cat);
         }
-
     }
-
 
     private void Load()
     {

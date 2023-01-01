@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text.Json.Serialization;
 using Cmaner.Holder;
 #if OS_WINDOWS
 using System.Security.Principal;
@@ -13,40 +12,56 @@ public class Runner
 
     private ProcessStartInfo GetProcessStartInfo()
     {
+        var cmd = Command.CommandText.Replace("\"", "\\\"");
+        var dir = Command.WorkingDirectory ?? Environment.CurrentDirectory;
 #if OS_WINDOWS
-        if (Command.AdminRequired)
-        {
 #pragma warning disable CA1416 // Validate platform compatibility
+        var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
 
-            var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-            if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
+        if (Command.AdminRequired && !principal.IsInRole(WindowsBuiltInRole.Administrator))
+            return new ProcessStartInfo
             {
-                return new ProcessStartInfo
-                {
-                    WorkingDirectory = Command.WorkingDirectory ?? Environment.CurrentDirectory,
-                    FileName = "cmd.exe",
-                    Arguments = $"/c \"{Command.CommandText}\"",
-                    Verb = "runas",
-                    UseShellExecute = true
-                };
-            }
-        }
+                WorkingDirectory = dir,
+                FileName = "cmd.exe",
+                Arguments = $"/c \"{cmd}\"",
+                Verb = "runas",
+                UseShellExecute = true
+            };
+        return new ProcessStartInfo
+        {
+            WorkingDirectory = dir,
+            FileName = "cmd.exe",
+            Arguments = $"/c \"{cmd}\""
+        };
+#pragma warning restore CA1416 // Validate platform compatibility
 
+#elif OS_LINUX
+        if (!Command.AdminRequired)
+            return new ProcessStartInfo
+            {
+                WorkingDirectory = dir,
+                FileName = "/bin/bash",
+                Arguments = $"-c \"{cmd}\"",
+            };
+        return new ProcessStartInfo
+        {
+            FileName = "/bin/sudo",
+            Arguments = $"/bin/bash -c \"cd {dir} && {cmd}\""
+        };
+#elif OS_MAC
+        if (!Command.AdminRequired)
+            return new ProcessStartInfo
+            {
+                WorkingDirectory = Command.WorkingDirectory ?? Environment.CurrentDirectory,
+                FileName = "/bin/bash",
+                Arguments = $"-c \"{cmd}\"",
+            };
         return new ProcessStartInfo
         {
             WorkingDirectory = Command.WorkingDirectory ?? Environment.CurrentDirectory,
-            FileName = "cmd.exe",
-            Arguments = $"/c \"{Command.CommandText}\"",
+            FileName = "/bin/bash",
+            Arguments = $"-c \"sudo {cmd}\"",
         };
-
-
-#elif OS_LINUX
-        return Command.AdminRequired
-            ? new ProcessStartInfo("bash", $"-c \"sudo {Command.CommandText}\"")
-            : new ProcessStartInfo("bash", "-c \"" + Command.CommandText + "\"");
-#elif OS_MAC
-      //todo
-        #error "Not implemented"
 #else
     #error Unsupported OS
 #endif

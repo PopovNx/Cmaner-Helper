@@ -1,22 +1,17 @@
 ﻿using Cmaner.Holder;
+
 namespace Cmaner.Menu;
 
-public class MenuCategory : IMenu<Category?>
+public class MenuCategory : Menu<Category?>
 {
-    private readonly Storage _storage;
     private int _selectedItem;
 
-    public MenuCategory(Storage storage)
-    {
-        _storage = storage;
-    }
-
-    public IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<string> PrepareBuffer()
     {
         yield return "== Select category ==";
-        for (var i = 0; i < _storage.Categories.Count; i++)
+        for (var i = 0; i < CmStorage.Instance.Categories.Count; i++)
         {
-            var category = _storage.Categories[i];
+            var category = CmStorage.Instance.Categories[i];
             var selected = i == _selectedItem ? ">>" : " ";
             if (string.IsNullOrEmpty(category.Description))
                 yield return $"{selected} {category.Name}";
@@ -25,10 +20,10 @@ public class MenuCategory : IMenu<Category?>
         }
     }
 
-    public void ProcessInput()
+    public override void ProcessInput()
     {
-        var key = Console.ReadKey(true).Key;
-        switch (key)
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+        switch (ReadKey().Key)
         {
             case ConsoleKey.UpArrow:
                 _selectedItem--;
@@ -37,14 +32,12 @@ public class MenuCategory : IMenu<Category?>
                 _selectedItem++;
                 break;
             case ConsoleKey.Enter:
-                var category = _storage.Categories[_selectedItem];
+                var category = CmStorage.Instance.Categories[_selectedItem];
                 Result = category;
                 IsFinished = true;
                 break;
         }
-        _selectedItem = Math.Clamp(_selectedItem, 0, _storage.Categories.Count - 1);
-    }
 
-    public Category? Result { get; private set; }
-    public bool IsFinished { get; private set; }
+        _selectedItem = Math.Clamp(_selectedItem, 0, CmStorage.Instance.Categories.Count - 1);
+    }
 }

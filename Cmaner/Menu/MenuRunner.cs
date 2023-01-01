@@ -2,21 +2,31 @@
 
 public static class MenuRunner
 {
-    public static T RunMenu<T>(IMenu<T> menu)
+    public static T? RunMenu<T>(Menu<T> menu)
     {
         Console.CursorVisible = false;
         var screenBuffer = new List<string>(16);
-        Console.CancelKeyPress += (_, _) => Flush(screenBuffer);
         var tempBuffer = new List<string>(16);
-        while (true)
+        try
         {
-            tempBuffer.Clear();
-            tempBuffer.AddRange(menu.PrepareBuffer());
-            WriteBuffer(screenBuffer, tempBuffer);
-            menu.ProcessInput();
-            if (!menu.IsFinished) continue;
+            while (true)
+            {
+                tempBuffer.Clear();
+                tempBuffer.AddRange(menu.PrepareBuffer());
+                WriteBuffer(screenBuffer, tempBuffer);
+
+                menu.ProcessInput();
+                if (!menu.IsFinished) continue;
+                return menu.Result;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return default;
+        }
+        finally
+        {
             Flush(screenBuffer);
-            return menu.Result;
         }
     }
 
