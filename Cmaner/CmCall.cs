@@ -120,6 +120,43 @@ public static class CmCall
         }
     }
 
+    /// <summary>
+    /// Edit a category by displaying a menu of categories to the user and then editing the selected category
+    /// </summary>
+    public static void EditCategory()
+    {
+        var catMenu = new MenuCategory();
+        var cat = MenuRunner.RunMenu(catMenu);
+        if (cat == null)
+        {
+            Console.WriteLine("Aborted");
+            return;
+        }
+
+        Console.WriteLine($"Editing {cat.Name}");
+        Console.Write($"Enter new name [{cat.Name}]: ");
+        var name = Console.ReadLine();
+        if (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name))
+            cat.Name = name;
+
+        Console.Write($"Enter new description [{cat.Description}]: ");
+        var desc = Console.ReadLine();
+        if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
+            cat.Description = desc;
+
+        var menuConf = new MenuConfirm("Are you sure?");
+        var result = MenuRunner.RunMenu(menuConf);
+        if (result)
+        {
+            Console.WriteLine($"Edited {cat.Name}");
+            CmStorage.Instance.Save();
+        }
+        else
+        {
+            Console.WriteLine("Aborted");
+        }
+    }
+
     #endregion
 
     #region Command Management
@@ -225,6 +262,62 @@ public static class CmCall
         }
     }
 
+    /// <summary>
+    /// Edit a command by displaying a menu of categories and then a menu of commands
+    /// </summary>
+    public static void EditCommand()
+    {
+        var catMenu = new MenuCommand();
+        var cat = MenuRunner.RunMenu(catMenu);
+        if (cat == null)
+        {
+            Console.WriteLine("Aborted");
+            return;
+        }
+
+        Console.WriteLine($"Editing {cat.CommandText}");
+        Console.Write($"Enter new title [{cat.Title}]: ");
+        var title = Console.ReadLine();
+        if (!string.IsNullOrEmpty(title) && !string.IsNullOrWhiteSpace(title))
+            cat.Title = title;
+
+        Console.Write($"Enter new command text [{cat.CommandText}]: ");
+        var text = Console.ReadLine();
+        if (!string.IsNullOrEmpty(text) && !string.IsNullOrWhiteSpace(text))
+            cat.CommandText = text;
+
+        Console.Write($"Enter new working directory [{cat.WorkingDirectory}]: ");
+        var dir = Console.ReadLine();
+        if (!string.IsNullOrEmpty(dir) && !string.IsNullOrWhiteSpace(dir))
+            cat.WorkingDirectory = dir;
+        
+        Console.Write($"Enter new description [{cat.Description}]: ");
+        var desc = Console.ReadLine();
+        if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
+            cat.Description = desc;
+        
+        Console.Write($"Enter new short call [{cat.ShortCall}]: ");
+        var shortCall = Console.ReadLine();
+        if (!string.IsNullOrEmpty(shortCall) && !string.IsNullOrWhiteSpace(shortCall))
+            cat.ShortCall = shortCall;
+        
+        var admReq = new MenuConfirm("Admin required to run?");
+        var result = MenuRunner.RunMenu(admReq);
+        cat.AdminRequired = result;
+        
+        var menuConf = new MenuConfirm("Are you sure?");
+        result = MenuRunner.RunMenu(menuConf);
+        if (result)
+        {
+            Console.WriteLine($"Edited {cat.CommandText}");
+            CmStorage.Instance.Save();
+        }
+        else
+        {
+            Console.WriteLine("Aborted");
+        }
+    }
+
     #endregion
 
     /// <summary>
@@ -235,13 +328,15 @@ public static class CmCall
         var strBuilder = new StringBuilder();
         strBuilder.AppendLine("Cmaner - command manager");
         strBuilder.AppendLine("Usage: ");
-        strBuilder.AppendLine("cmaner - run menu");
-        strBuilder.AppendLine("cmaner [add] [category] - add category");
-        strBuilder.AppendLine("cmaner [add] [command] - add command");
-        strBuilder.AppendLine("cmaner [rm] [category] - remove category");
-        strBuilder.AppendLine("cmaner [rm] [command] - remove command");
-        strBuilder.AppendLine("cmaner [help] - show this help");
-        strBuilder.AppendLine("cmaner [short call] - run command");
+        strBuilder.AppendLine("cm - run menu");
+        strBuilder.AppendLine("cm [add] [category] - add category");
+        strBuilder.AppendLine("cm [add] [command] - add command");
+        strBuilder.AppendLine("cm [rm] [category] - remove category");
+        strBuilder.AppendLine("cm [rm] [command] - remove command");
+        strBuilder.AppendLine("cm [edit] [category] - edit category");
+        strBuilder.AppendLine("cm [edit] [command] - edit command");
+        strBuilder.AppendLine("cm [help] - show this help");
+        strBuilder.AppendLine("cm [short call] - run command");
         Console.WriteLine(strBuilder.ToString());
     }
 }
