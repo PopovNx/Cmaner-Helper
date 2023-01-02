@@ -17,17 +17,26 @@ internal static class Program
             case ["rm"]:
                 Console.WriteLine("What do you want to delete (category/command)?");
                 break;
+            case ["edit"]:
+                Console.WriteLine("What do you want to edit (category/command)?");
+                break;
             case ["add", "category"]:
                 CmCall.AddCategory();
                 break;
             case ["rm", "category"]:
                 CmCall.RemoveCategory();
                 break;
+            case ["edit", "category"]:
+                CmCall.EditCategory();
+                break;
             case ["add", "command"]:
                 CmCall.AddCommand();
                 break;
             case ["rm", "command"]:
                 CmCall.RemoveCommand();
+                break;
+            case ["edit", "command"]:
+                CmCall.EditCommand();
                 break;
             case ["help"]:
                 CmCall.Help();
