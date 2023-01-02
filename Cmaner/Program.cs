@@ -6,10 +6,9 @@ internal static class Program
 {
     public static async Task Main(string[] args)
     {
-       
         CmConfig.Init();
         CmStorage.Init();
-        
+    
         switch (args)
         {
             case []:
@@ -42,11 +41,15 @@ internal static class Program
             case ["edit", "command"]:
                 CmCall.EditCommand();
                 break;
+            case ["init", "default"]:
+                //TODO: Add default commands
+                throw new NotImplementedException();
+                break;
             case ["help"]:
                 CmCall.Help();
                 break;
-            case [{ } shortCall] when CmStorage.HasShortCall(shortCall, out var cmd):
-                await CmCall.RunCmd(cmd ?? throw new NullReferenceException("Cmd is null"));
+            case [{ } shortCall, .. { } lArg] when CmStorage.HasShortCall(shortCall, out var cmd):
+                await CmCall.RunCmd(cmd ?? throw new NullReferenceException("Cmd is null"), lArg);
                 break;
             default:
                 Console.WriteLine("Wrong arguments, write [help] for help");
