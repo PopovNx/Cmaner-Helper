@@ -6,7 +6,7 @@ public static class MenuRunner
     {
         Console.CursorVisible = false;
         var screenBuffer = new List<string>(16);
-        var tempBuffer = new List<string>(16);
+        var tempBuffer = new List<LineData>(16);
         try
         {
             while (true)
@@ -33,21 +33,36 @@ public static class MenuRunner
 
     private static void Flush(List<string> screenBuffer)
     {
-        WriteBuffer(screenBuffer, Enumerable.Repeat("", screenBuffer.Count).ToList());
+        WriteBuffer(screenBuffer, Enumerable.Repeat((LineData)"", screenBuffer.Count).ToList());
         Console.CursorVisible = true;
-        WriteBuffer(screenBuffer, new List<string>());
+        WriteBuffer(screenBuffer, new List<LineData>());
     }
 
-    private static void WriteBuffer(List<string> oldScreen, List<string> newScreen)
+
+    private static void WriteBuffer(List<string> oldScreen, List<LineData> newScreen)
     {
-        Console.SetCursorPosition(0, Console.CursorTop - oldScreen.Count);
-        var clearLine = $"\r{new string(' ', Console.WindowWidth - 1)}\r";
+        Console.SetCursorPosition(0, Math.Max(0, Console.CursorTop - oldScreen.Count));
+        
+        var foregroundColor = Console.ForegroundColor;
+        var backgroundColor = Console.BackgroundColor;
         foreach (var line in newScreen)
         {
-            Console.WriteLine(clearLine + line);
+            if (line.ForegroundColor.HasValue)
+                Console.ForegroundColor = line.ForegroundColor.Value;
+            if (line.BackgroundColor.HasValue)
+                Console.BackgroundColor = line.BackgroundColor.Value;
+            
+            var tabbedLine = line.Text.Replace("\t", "    ").PadRight(Console.WindowWidth);
+            if (tabbedLine.Length > Console.WindowWidth)
+                tabbedLine = $"{tabbedLine[..(Console.WindowWidth - 3)]}...";
+            Console.WriteLine(tabbedLine);
+
+
+            Console.ForegroundColor = foregroundColor;
+            Console.BackgroundColor = backgroundColor;
         }
 
         oldScreen.Clear();
-        oldScreen.AddRange(newScreen);
+        oldScreen.AddRange(newScreen.Select(x => x.ToString()));
     }
 }

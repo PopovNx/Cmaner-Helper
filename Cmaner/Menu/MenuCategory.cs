@@ -6,7 +6,7 @@ public class MenuCategory : Menu<Category?>
 {
     private int _selectedItem;
 
-    public override IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<LineData> PrepareBuffer()
     {
         yield return "== Select category ==";
         for (var i = 0; i < CmStorage.Instance.Categories.Count; i++)

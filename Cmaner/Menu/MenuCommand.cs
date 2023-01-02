@@ -8,10 +8,11 @@ public class MenuCommand : Menu<Command?>
     private int _selected;
     private int _totalMenuItems;
 
-    public override IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<LineData> PrepareBuffer()
     {
         var curMenu = 0;
         yield return "== Select a command ==";
+
         foreach (var cat in CmStorage.Instance.Categories)
         {
             if (string.IsNullOrEmpty(cat.Description))
