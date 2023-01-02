@@ -6,7 +6,7 @@ public class MenuConfirm : Menu<bool>
 
     private string Message { get; }
 
-    public override IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<LineData> PrepareBuffer()
     {
         yield return Message;
         if (Result)
