@@ -59,13 +59,12 @@ public static class CmCall
     public static void AddCategory()
     {
         var cat = new Category();
-        Console.Write("Enter category name: ");
         while (true)
         {
-            var name = Console.ReadLine();
+            var name = ReadLine.Read("Enter category name: ").Trim();
             if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
             {
-                Console.WriteLine("Name cannot be empty");
+                Console.WriteLine("Category name cannot be empty");
                 continue;
             }
 
@@ -73,8 +72,7 @@ public static class CmCall
             break;
         }
 
-        Console.Write("Enter description [optional]: ");
-        var desc = Console.ReadLine();
+        var desc = ReadLine.Read("Enter description [optional]: ").Trim();
         if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
             cat.Description = desc;
 
@@ -125,8 +123,7 @@ public static class CmCall
     /// </summary>
     public static void EditCategory()
     {
-        var catMenu = new MenuCategory();
-        var cat = MenuRunner.RunMenu(catMenu);
+        var cat = MenuRunner.RunMenu(new MenuCategory());
         if (cat == null)
         {
             Console.WriteLine("Aborted");
@@ -134,13 +131,11 @@ public static class CmCall
         }
 
         Console.WriteLine($"Editing {cat.Name}");
-        Console.Write($"Enter new name [{cat.Name}]: ");
-        var name = Console.ReadLine();
+        var name = ReadLine.Read($"Enter new name [{cat.Name}]: ", cat.Name).Trim();
+        var desc = ReadLine.Read($"Enter new description [{cat.Description}]: ", cat.Description).Trim();
+
         if (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name))
             cat.Name = name;
-
-        Console.Write($"Enter new description [{cat.Description}]: ");
-        var desc = Console.ReadLine();
         if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
             cat.Description = desc;
 
@@ -176,14 +171,11 @@ public static class CmCall
 
         Console.WriteLine($"Selected category {cat.Name}");
         var cmd = new Command();
-        Console.Write("Enter command title [optional]: ");
-        var title = Console.ReadLine();
-        if (!string.IsNullOrEmpty(title) && !string.IsNullOrWhiteSpace(title))
-            cmd.Title = title;
-        Console.Write("Enter command text: ");
+        var title = ReadLine.Read("Enter command title [optional]: ").Trim();
+        
         while (true)
         {
-            var text = Console.ReadLine();
+            var text = ReadLine.Read("Enter command text: ").Trim();
             if (string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(text))
             {
                 Console.WriteLine("Command text cannot be empty");
@@ -194,27 +186,29 @@ public static class CmCall
             break;
         }
 
-        Console.Write("Enter working directory [optional]: ");
-        var dir = Console.ReadLine();
+        var dir = ReadLine.Read("Enter working directory [optional]: ").Trim();
+        var desc = ReadLine.Read("Enter description [optional]: ").Trim();
+        var shortCall = ReadLine.Read("Enter short call [optional]: ").Trim();
+
+        if (!string.IsNullOrEmpty(title) && !string.IsNullOrWhiteSpace(title))
+            cmd.Title = title;
+        
         if (!string.IsNullOrEmpty(dir) && !string.IsNullOrWhiteSpace(dir))
             cmd.WorkingDirectory = dir;
 
-        Console.Write("Enter description [optional]: ");
-        var desc = Console.ReadLine();
         if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
             cmd.Description = desc;
 
-        Console.Write("Enter short call [optional]: ");
-        var shortCall = Console.ReadLine();
         if (!string.IsNullOrEmpty(shortCall) && !string.IsNullOrWhiteSpace(shortCall))
             cmd.ShortCall = shortCall;
 
         var admReq = new MenuConfirm("Admin required to run?");
         var result = MenuRunner.RunMenu(admReq);
         cmd.AdminRequired = result;
-        Console.WriteLine($"Admin required: {(result ? "Yes" : "No")}");
 
+        Console.WriteLine($"Admin required: {(result ? "Yes" : "No")}");
         var menuConf = new MenuConfirm("Are you sure?");
+
         result = MenuRunner.RunMenu(menuConf);
         if (result)
         {
@@ -276,35 +270,32 @@ public static class CmCall
         }
 
         Console.WriteLine($"Editing {cat.CommandText}");
-        Console.Write($"Enter new title [{cat.Title}]: ");
-        var title = Console.ReadLine();
+
+        var title = ReadLine.Read($"Enter new title [{cat.Title}]: ", cat.Title).Trim();
         if (!string.IsNullOrEmpty(title) && !string.IsNullOrWhiteSpace(title))
             cat.Title = title;
 
-        Console.Write($"Enter new command text [{cat.CommandText}]: ");
-        var text = Console.ReadLine();
+        var text = ReadLine.Read($"Enter new command text [{cat.CommandText}]: ", cat.CommandText).Trim();
         if (!string.IsNullOrEmpty(text) && !string.IsNullOrWhiteSpace(text))
             cat.CommandText = text;
 
-        Console.Write($"Enter new working directory [{cat.WorkingDirectory}]: ");
-        var dir = Console.ReadLine();
+      
+        var dir = ReadLine.Read($"Enter new working directory [{cat.WorkingDirectory}]: ", cat.WorkingDirectory).Trim();
         if (!string.IsNullOrEmpty(dir) && !string.IsNullOrWhiteSpace(dir))
             cat.WorkingDirectory = dir;
         
-        Console.Write($"Enter new description [{cat.Description}]: ");
-        var desc = Console.ReadLine();
+        var desc = ReadLine.Read($"Enter new description [{cat.Description}]: ", cat.Description).Trim();
         if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
             cat.Description = desc;
-        
-        Console.Write($"Enter new short call [{cat.ShortCall}]: ");
-        var shortCall = Console.ReadLine();
+
+        var shortCall = ReadLine.Read($"Enter new short call [{cat.ShortCall}]: ", cat.ShortCall).Trim();
         if (!string.IsNullOrEmpty(shortCall) && !string.IsNullOrWhiteSpace(shortCall))
             cat.ShortCall = shortCall;
-        
+
         var admReq = new MenuConfirm("Admin required to run?");
         var result = MenuRunner.RunMenu(admReq);
         cat.AdminRequired = result;
-        
+
         var menuConf = new MenuConfirm("Are you sure?");
         result = MenuRunner.RunMenu(menuConf);
         if (result)

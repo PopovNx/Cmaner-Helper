@@ -21,4 +21,7 @@
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
         <DefineConstants>OS_MAC</DefineConstants>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="ReadLine.Reboot" Version="3.4.1" />
+    </ItemGroup>
 </Project>
