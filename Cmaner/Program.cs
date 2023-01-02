@@ -1,4 +1,6 @@
-﻿namespace Cmaner;
+﻿global using ReadLineReboot;
+
+namespace Cmaner;
 
 internal static class Program
 {
@@ -6,6 +8,7 @@ internal static class Program
     {
         CmConfig.Init();
         CmStorage.Init();
+        
         switch (args)
         {
             case []:

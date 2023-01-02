@@ -27,6 +27,7 @@ public static class MenuRunner
         finally
         {
             Flush(screenBuffer);
+            Console.CursorVisible = true;
         }
     }
 
