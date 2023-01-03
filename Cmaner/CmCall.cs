@@ -13,14 +13,14 @@ public static class CmCall
     /// Run a command and block console until it's done
     /// </summary>
     /// <param name="cmd">Command to run</param>
-    public static async Task RunCmd(Command cmd)
+    public static async Task RunCmd(Command cmd,string[] lArg)
     {
         var runner = new Runner(cmd);
         try
         {
             Console.WriteLine($"Running {cmd.CommandText}");
             CmConfig.CanBeInterrupted = false;
-            await runner.RunAsync();
+            await runner.RunAsync(lArg);
             CmConfig.CanBeInterrupted = true;
         }
         catch (Exception e)
@@ -48,7 +48,7 @@ public static class CmCall
 
         var result = MenuRunner.RunMenu(new MenuCommand());
         if (result != null)
-            await RunCmd(result);
+            await RunCmd(result, Array.Empty<string>());
     }
 
     #region Category Management
