@@ -8,13 +8,14 @@ public class MenuCommand : Menu<Command?>
     private int _selected;
     private int _totalMenuItems;
 
-    public override IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<LineData> PrepareBuffer()
     {
         var curMenu = 0;
         yield return "== Select a command ==";
+
         foreach (var cat in CmStorage.Instance.Categories)
         {
-            if (string.IsNullOrEmpty(cat.Description))
+            if (string.IsNullOrWhiteSpace(cat.Description))
                 yield return $"[{cat.Name}]";
             else
                 yield return $"[{cat.Name}] - {cat.Description}";
@@ -26,7 +27,7 @@ public class MenuCommand : Menu<Command?>
                 if (cmd.AdminRequired)
                     strBuilder.Append("[ADMIN] ");
 
-                if (!string.IsNullOrEmpty(cmd.Title))
+                if (!string.IsNullOrWhiteSpace(cmd.Title))
                 {
                     strBuilder.Append(cmd.Title);
                     strBuilder.Append($" ({cmd.CommandText})");
@@ -34,10 +35,10 @@ public class MenuCommand : Menu<Command?>
                 else
                     strBuilder.Append(cmd.CommandText);
 
-                if (!string.IsNullOrEmpty(cmd.Description))
+                if (!string.IsNullOrWhiteSpace(cmd.Description))
                     strBuilder.Append($" - {cmd.Description}");
 
-                if (!string.IsNullOrEmpty(cmd.ShortCall))
+                if (!string.IsNullOrWhiteSpace(cmd.ShortCall))
                     strBuilder.Append($" (short: {cmd.ShortCall})");
                 yield return $"\t{strBuilder}";
                 curMenu++;

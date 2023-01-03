@@ -6,14 +6,14 @@ public class MenuCategory : Menu<Category?>
 {
     private int _selectedItem;
 
-    public override IEnumerable<string> PrepareBuffer()
+    public override IEnumerable<LineData> PrepareBuffer()
     {
         yield return "== Select category ==";
         for (var i = 0; i < CmStorage.Instance.Categories.Count; i++)
         {
             var category = CmStorage.Instance.Categories[i];
             var selected = i == _selectedItem ? ">>" : " ";
-            if (string.IsNullOrEmpty(category.Description))
+            if (string.IsNullOrWhiteSpace(category.Description))
                 yield return $"{selected} {category.Name}";
             else
                 yield return $"{selected} {category.Name} - ({category.Description})";

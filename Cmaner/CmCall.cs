@@ -13,14 +13,16 @@ public static class CmCall
     /// Run a command and block console until it's done
     /// </summary>
     /// <param name="cmd">Command to run</param>
-    public static async Task RunCmd(Command cmd)
+    /// <param name="lArg">Arguments to pass to command</param>
+    public static async Task RunCmd(Command cmd, string[] lArg)
     {
         var runner = new Runner(cmd);
         try
         {
-            Console.WriteLine($"Running {cmd.CommandText}");
+            var title = string.IsNullOrWhiteSpace(cmd.Title) ? cmd.CommandText : cmd.Title;
+            Console.WriteLine($"Running {title}");
             CmConfig.CanBeInterrupted = false;
-            await runner.RunAsync();
+            await runner.RunAsync(lArg);
             CmConfig.CanBeInterrupted = true;
         }
         catch (Exception e)
@@ -48,7 +50,7 @@ public static class CmCall
 
         var result = MenuRunner.RunMenu(new MenuCommand());
         if (result != null)
-            await RunCmd(result);
+            await RunCmd(result, Array.Empty<string>());
     }
 
     #region Category Management
@@ -59,13 +61,12 @@ public static class CmCall
     public static void AddCategory()
     {
         var cat = new Category();
-        Console.Write("Enter category name: ");
         while (true)
         {
-            var name = Console.ReadLine();
-            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+            var name = ReadLine.Read("Enter category name: ").Trim();
+            if (string.IsNullOrWhiteSpace(name))
             {
-                Console.WriteLine("Name cannot be empty");
+                Console.WriteLine("Category name cannot be empty");
                 continue;
             }
 
@@ -73,9 +74,8 @@ public static class CmCall
             break;
         }
 
-        Console.Write("Enter description [optional]: ");
-        var desc = Console.ReadLine();
-        if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
+        var desc = ReadLine.Read("Enter description [optional]: ").Trim();
+        if (!string.IsNullOrWhiteSpace(desc))
             cat.Description = desc;
 
         var menuConf = new MenuConfirm("Are you sure?");
@@ -120,6 +120,40 @@ public static class CmCall
         }
     }
 
+    /// <summary>
+    /// Edit a category by displaying a menu of categories to the user and then editing the selected category
+    /// </summary>
+    public static void EditCategory()
+    {
+        var cat = MenuRunner.RunMenu(new MenuCategory());
+        if (cat == null)
+        {
+            Console.WriteLine("Aborted");
+            return;
+        }
+
+        Console.WriteLine($"Editing {cat.Name}");
+        var name = ReadLine.Read($"Enter new name [{cat.Name}]: ", cat.Name).Trim();
+        var desc = ReadLine.Read($"Enter new description [{cat.Description}]: ", cat.Description).Trim();
+
+        if (!string.IsNullOrWhiteSpace(name))
+            cat.Name = name;
+        if (!string.IsNullOrWhiteSpace(desc))
+            cat.Description = desc;
+
+        var menuConf = new MenuConfirm("Are you sure?");
+        var result = MenuRunner.RunMenu(menuConf);
+        if (result)
+        {
+            Console.WriteLine($"Edited {cat.Name}");
+            CmStorage.Instance.Save();
+        }
+        else
+        {
+            Console.WriteLine("Aborted");
+        }
+    }
+
     #endregion
 
     #region Command Management
@@ -139,15 +173,12 @@ public static class CmCall
 
         Console.WriteLine($"Selected category {cat.Name}");
         var cmd = new Command();
-        Console.Write("Enter command title [optional]: ");
-        var title = Console.ReadLine();
-        if (!string.IsNullOrEmpty(title) && !string.IsNullOrWhiteSpace(title))
-            cmd.Title = title;
-        Console.Write("Enter command text: ");
+        var title = ReadLine.Read("Enter command title [optional]: ").Trim();
+
         while (true)
         {
-            var text = Console.ReadLine();
-            if (string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(text))
+            var text = ReadLine.Read("Enter command text: ").Trim();
+            if (string.IsNullOrWhiteSpace(text))
             {
                 Console.WriteLine("Command text cannot be empty");
                 continue;
@@ -157,27 +188,29 @@ public static class CmCall
             break;
         }
 
-        Console.Write("Enter working directory [optional]: ");
-        var dir = Console.ReadLine();
-        if (!string.IsNullOrEmpty(dir) && !string.IsNullOrWhiteSpace(dir))
+        var dir = ReadLine.Read("Enter working directory [optional]: ").Trim();
+        var desc = ReadLine.Read("Enter description [optional]: ").Trim();
+        var shortCall = ReadLine.Read("Enter short call [optional]: ").Trim();
+
+        if (!string.IsNullOrWhiteSpace(title))
+            cmd.Title = title;
+
+        if (!string.IsNullOrWhiteSpace(dir))
             cmd.WorkingDirectory = dir;
 
-        Console.Write("Enter description [optional]: ");
-        var desc = Console.ReadLine();
-        if (!string.IsNullOrEmpty(desc) && !string.IsNullOrWhiteSpace(desc))
+        if (!string.IsNullOrWhiteSpace(desc))
             cmd.Description = desc;
 
-        Console.Write("Enter short call [optional]: ");
-        var shortCall = Console.ReadLine();
-        if (!string.IsNullOrEmpty(shortCall) && !string.IsNullOrWhiteSpace(shortCall))
+        if (!string.IsNullOrWhiteSpace(shortCall))
             cmd.ShortCall = shortCall;
 
         var admReq = new MenuConfirm("Admin required to run?");
         var result = MenuRunner.RunMenu(admReq);
         cmd.AdminRequired = result;
-        Console.WriteLine($"Admin required: {(result ? "Yes" : "No")}");
 
+        Console.WriteLine($"Admin required: {(result ? "Yes" : "No")}");
         var menuConf = new MenuConfirm("Are you sure?");
+
         result = MenuRunner.RunMenu(menuConf);
         if (result)
         {
@@ -225,6 +258,59 @@ public static class CmCall
         }
     }
 
+    /// <summary>
+    /// Edit a command by displaying a menu of categories and then a menu of commands
+    /// </summary>
+    public static void EditCommand()
+    {
+        var catMenu = new MenuCommand();
+        var cat = MenuRunner.RunMenu(catMenu);
+        if (cat == null)
+        {
+            Console.WriteLine("Aborted");
+            return;
+        }
+
+        Console.WriteLine($"Editing {cat.CommandText}");
+
+        var title = ReadLine.Read($"Enter new title [{cat.Title}]: ", cat.Title).Trim();
+        if (string.IsNullOrWhiteSpace(title))
+            cat.Title = title;
+
+        var text = ReadLine.Read($"Enter new command text [{cat.CommandText}]: ", cat.CommandText).Trim();
+        if (!string.IsNullOrWhiteSpace(text))
+            cat.CommandText = text;
+
+
+        var dir = ReadLine.Read($"Enter new working directory [{cat.WorkingDirectory}]: ", cat.WorkingDirectory).Trim();
+        if (!string.IsNullOrWhiteSpace(dir))
+            cat.WorkingDirectory = dir;
+
+        var desc = ReadLine.Read($"Enter new description [{cat.Description}]: ", cat.Description).Trim();
+        if (!string.IsNullOrWhiteSpace(desc))
+            cat.Description = desc;
+
+        var shortCall = ReadLine.Read($"Enter new short call [{cat.ShortCall}]: ", cat.ShortCall).Trim();
+        if (!string.IsNullOrWhiteSpace(shortCall))
+            cat.ShortCall = shortCall;
+
+        var admReq = new MenuConfirm("Admin required to run?");
+        var result = MenuRunner.RunMenu(admReq);
+        cat.AdminRequired = result;
+
+        var menuConf = new MenuConfirm("Are you sure?");
+        result = MenuRunner.RunMenu(menuConf);
+        if (result)
+        {
+            Console.WriteLine($"Edited {cat.CommandText}");
+            CmStorage.Instance.Save();
+        }
+        else
+        {
+            Console.WriteLine("Aborted");
+        }
+    }
+
     #endregion
 
     /// <summary>
@@ -235,13 +321,58 @@ public static class CmCall
         var strBuilder = new StringBuilder();
         strBuilder.AppendLine("Cmaner - command manager");
         strBuilder.AppendLine("Usage: ");
-        strBuilder.AppendLine("cmaner - run menu");
-        strBuilder.AppendLine("cmaner [add] [category] - add category");
-        strBuilder.AppendLine("cmaner [add] [command] - add command");
-        strBuilder.AppendLine("cmaner [rm] [category] - remove category");
-        strBuilder.AppendLine("cmaner [rm] [command] - remove command");
-        strBuilder.AppendLine("cmaner [help] - show this help");
-        strBuilder.AppendLine("cmaner [short call] - run command");
+        strBuilder.AppendLine("cm - run menu");
+        strBuilder.AppendLine("cm [add] [category] - add category");
+        strBuilder.AppendLine("cm [add] [command] - add command");
+        strBuilder.AppendLine("cm [rm] [category] - remove category");
+        strBuilder.AppendLine("cm [rm] [command] - remove command");
+        strBuilder.AppendLine("cm [edit] [category] - edit category");
+        strBuilder.AppendLine("cm [edit] [command] - edit command");
+        strBuilder.AppendLine("cm [help] - show this help");
+        strBuilder.AppendLine("cm [short call] - run command");
         Console.WriteLine(strBuilder.ToString());
+    }
+
+    public static void InitDefault()
+    {
+        if (CmStorage.Instance.Categories.Count > 0)
+            return;
+        
+        CmStorage.Instance.Categories.Clear();
+        CmStorage.Instance.Save();
+
+        var cat = new Category
+        {
+            Name = "Default",
+            Description = "Default category"
+        };
+
+        var cmd1 = new Command
+        {
+            Title = "Echo",
+            CommandText = "echo Hello world!",
+            Description = "Echo command",
+            ShortCall = "hi",
+            AdminRequired = false,
+            WorkingDirectory = ""
+        };
+        //add about command
+
+        var cmd2 = new Command
+        {
+            Title = "About",
+            CommandText = @"echo Cmaner - command manager, written by @PopovDev, write ""cm help"" for more info",
+            Description = "About command",
+            ShortCall = "about",
+            AdminRequired = false,
+            WorkingDirectory = ""
+        };
+
+        cat.Commands.Add(cmd1);
+        cat.Commands.Add(cmd2);
+
+        CmStorage.Instance.Categories.Add(cat);
+        CmStorage.Instance.Save();
+        Console.WriteLine("Default commands added");
     }
 }
