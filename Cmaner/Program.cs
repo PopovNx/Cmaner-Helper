@@ -41,9 +41,8 @@ internal static class Program
             case ["edit", "command"]:
                 CmCall.EditCommand();
                 break;
-            case ["init", "default"]:
-                //TODO: Add default commands
-                throw new NotImplementedException();
+            case ["@initialize@"]:
+                CmCall.InitDefault();
                 break;
             case ["help"]:
                 CmCall.Help();
