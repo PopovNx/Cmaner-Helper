@@ -13,7 +13,7 @@ public class MenuCategory : Menu<Category?>
         {
             var category = CmStorage.Instance.Categories[i];
             var selected = i == _selectedItem ? ">>" : " ";
-            if (string.IsNullOrEmpty(category.Description))
+            if (string.IsNullOrWhiteSpace(category.Description))
                 yield return $"{selected} {category.Name}";
             else
                 yield return $"{selected} {category.Name} - ({category.Description})";

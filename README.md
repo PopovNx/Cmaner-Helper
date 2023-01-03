@@ -9,7 +9,7 @@ Tool for quick and convenient calling of commands
 
 To install run next script:
 ```
-wget https://raw.githubusercontent.com/PopovDev/Cmaner-Helper/master/install-cm.sh
+wget https://raw.githubusercontent.com/PopovDev/Cmaner-Helper/main/install-cm.sh
 chmod +x install-cm.sh
 ./install-cm.sh
 ```
@@ -23,9 +23,9 @@ For uninstall:
 
 To install run next script in powershell:
 ```
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "&{$((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/PopovDev/Cmaner-Helper/feature/windows-installer/windows-install.ps1'))}"
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "&{$((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/PopovDev/Cmaner-Helper/main/windows-install.ps1'))}"
 ```
 For uninstall:
 ```
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "&{$((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/PopovDev/Cmaner-Helper/feature/windows-installer/windows-install.ps1'))} uninstall"
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "&{$((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/PopovDev/Cmaner-Helper/main/windows-install.ps1'))} uninstall"
 ```
