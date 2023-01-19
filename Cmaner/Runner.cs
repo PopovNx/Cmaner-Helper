@@ -8,6 +8,12 @@ public class Runner
 {
     private Command Command { get; }
 
+    private string WorkDirectory =>
+        (Command.Flags.HasFlag(CmdFlags.HasWorkingDirectory)
+            ? Command.WorkingDirectory
+            : Environment.CurrentDirectory)
+        ?? Environment.CurrentDirectory;
+
 
     private ProcessStartInfo GetProcessStartInfo(string[] lArg)
     {
@@ -20,52 +26,70 @@ public class Runner
 #endif
     }
 
-    private ProcessStartInfo GetWindowsStartInfo(IEnumerable<string> lArg)
+    private ProcessStartInfo GetWindowsStartInfo(IReadOnlyCollection<string> lArg)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
         const string executor = "cmd.exe";
         var lArgs = string.Join(" ", lArg.Select(a => a.Contains(' ') ? $"\"{a}\"" : a));
-        var dir = Command.WorkingDirectory ?? Environment.CurrentDirectory;
-        var cmd = Command.CommandText.Replace("\"", "\"");
-        var cmdArgs = $"/c {cmd} {lArgs}";
-        
+
+        var cmd = Command.CommandText;
+
+        var cmdArgs = cmd.Contains("%args") ? $" {cmd.Replace("%args", lArgs)}" : $"{cmd} {lArgs}";
         var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-        if (Command.AdminRequired && !principal.IsInRole(WindowsBuiltInRole.Administrator))
+        if (Command.Flags.HasFlag(CmdFlags.AdminRequired) && !principal.IsInRole(WindowsBuiltInRole.Administrator))
             return new ProcessStartInfo
             {
-                WorkingDirectory = dir,
                 FileName = executor,
-                Arguments = $"{cmdArgs} && pause",
+                Arguments = $"/c cd /d \"{WorkDirectory}\" & {cmdArgs} & pause",
                 Verb = "runas",
                 UseShellExecute = true
             };
         return new ProcessStartInfo
         {
-            WorkingDirectory = dir,
+            WorkingDirectory = WorkDirectory,
             FileName = executor,
-            Arguments = cmdArgs,
+            Arguments = $"/c {cmdArgs}",
         };
 #pragma warning restore CA1416 // Validate platform compatibility
     }
-    private ProcessStartInfo GetLinuxStartInfo(IEnumerable<string> lArg)
+
+    private ProcessStartInfo GetLinuxStartInfo(IReadOnlyCollection<string> lArg)
     {
         var lArgs = string.Join(" ", lArg.Select(a => a.Contains(' ') ? $"\"{a}\"" : a));
-        var dir = Command.WorkingDirectory ?? Environment.CurrentDirectory;
+
+
         var cmd = Command.CommandText.Replace("\"", "\\\"");
         lArgs = lArgs.Replace("\"", "\\\"");
-        if (!Command.AdminRequired)
+
+        string cmdArgs;
+        if (cmd.Contains("%args"))
+        {
+            cmdArgs = $"{cmd.Replace("%args", lArgs)}";
+        }
+        else if (lArg.Count > 0)
+        {
+            cmdArgs = $"{cmd} {lArgs}";
+        }
+        else
+        {
+            cmdArgs = $"{cmd}";
+        }
+
+        if (!Command.Flags.HasFlag(CmdFlags.AdminRequired))
             return new ProcessStartInfo
             {
-                WorkingDirectory = dir,
+                WorkingDirectory = WorkDirectory,
                 FileName = "/bin/bash",
-                Arguments = $"-c \"{cmd} {lArgs}\"",
+                Arguments = $"-c \"{cmdArgs}\"",
             };
+        
         return new ProcessStartInfo
         {
             FileName = "/bin/sudo",
-            Arguments = $"/bin/bash -c \"cd {dir} && {cmd} {lArgs}\"",
+            Arguments = $"/bin/bash -c \"cd {WorkDirectory} && {cmdArgs}\""
         };
     }
+
     public Runner(Command command) => Command = command;
 
     public async Task RunAsync(string[] lArg)

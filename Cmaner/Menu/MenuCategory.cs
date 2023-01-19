@@ -2,7 +2,7 @@
 
 namespace Cmaner.Menu;
 
-public class MenuCategory : Menu<Category?>
+public class MenuCategory : Menu<Category>
 {
     private int _selectedItem;
 

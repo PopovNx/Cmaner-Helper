@@ -3,22 +3,22 @@
 public class Command
 {
     public string? Title { get; set; }
-    public bool AdminRequired { get; set; }
-    public string CommandText { get; set; } = null!;
-    public string? WorkingDirectory { get; set; }
     public string? Description { get; set; }
+    public required string CommandText { get; set; }
+    public CmdFlags Flags { get; set; }
+    public string? WorkingDirectory { get; set; }
     public string? ShortCall { get; set; }
 
     public byte[] ToBytes()
     {
         using var ms = new MemoryStream();
         using var writer = new BinaryWriter(ms);
-        writer.Write(Title ?? "");
-        writer.Write(AdminRequired);
+        writer.Write(Title ?? string.Empty);
+        writer.Write(Description ?? string.Empty);
         writer.Write(CommandText);
-        writer.Write(WorkingDirectory ?? "");
-        writer.Write(Description?? "");
-        writer.Write(ShortCall ?? "");
+        writer.Write((int)Flags);
+        writer.Write(WorkingDirectory ?? string.Empty);
+        writer.Write(ShortCall ?? string.Empty);
         return ms.ToArray();
     }
 
@@ -29,10 +29,10 @@ public class Command
         return new Command
         {
             Title = reader.ReadString(),
-            AdminRequired = reader.ReadBoolean(),
-            CommandText = reader.ReadString(),
-            WorkingDirectory = reader.ReadString(),
             Description = reader.ReadString(),
+            CommandText = reader.ReadString(),
+            Flags = (CmdFlags)reader.ReadInt32(),
+            WorkingDirectory = reader.ReadString(),
             ShortCall = reader.ReadString()
         };
     }
