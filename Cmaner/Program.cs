@@ -4,11 +4,8 @@ namespace Cmaner;
 
 internal static class Program
 {
-    public static async Task Main(string[] args)
+    private static async Task ProcessArgumentsAsync(string[] args)
     {
-        CmConfig.Init();
-        CmStorage.Init();
-    
         switch (args)
         {
             case []:
@@ -53,6 +50,20 @@ internal static class Program
             default:
                 Console.WriteLine("Wrong arguments, write [help] for help");
                 break;
+        }
+    }
+
+    public static async Task Main(string[] args)
+    {
+        CmConfig.Init();
+        CmStorage.Init();
+        try
+        {
+            await ProcessArgumentsAsync(args);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Aborted");
         }
     }
 }

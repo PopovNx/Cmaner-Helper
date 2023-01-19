@@ -5,7 +5,7 @@ namespace Cmaner;
 public static class CmStorage
 {
     public static Storage Instance { get; private set; } = null!;
-    private const string StorageFileName = "commands.dat";
+    private const string StorageFileName = "commands.v2.dat";
     private const string StorageDirName = ".cm";
 
     /// <summary>
@@ -23,7 +23,8 @@ public static class CmStorage
 
     public static bool HasShortCall(string shortCall, out Command? cmd)
     {
-        var commands = Instance.Categories.SelectMany(x => x.Commands);
+        var commands = Instance.Categories.SelectMany(x => x.Commands)
+            .Where(x => (x.Flags & CmdFlags.HasShortCall) != 0);
         foreach (var command in commands)
         {
             if (command.ShortCall != shortCall) continue;
